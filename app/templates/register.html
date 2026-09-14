@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Sign Up - FinanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white mt-3">
+            <h3 class="fw-bold text-center mb-1">Create an Account</h3>
+            <p class="text-center text-muted small mb-4">Start tracking your personal finances</p>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="e.g. rahul_sharma" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="rahul@example.com" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">Sign Up</button>
+            </form>
+
+            <hr class="my-4">
+            <p class="text-center mb-0 small text-muted">
+                Already have an account? <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold">Log In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
