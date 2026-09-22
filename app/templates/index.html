@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Welcome - FinanceFlow{% endblock %}
+
+{% block content %}
+<div class="row align-items-center py-5">
+    <div class="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
+        <h1 class="display-4 fw-bold mb-3 text-dark">Take Control of Your <span class="text-success">Money</span></h1>
+        <p class="lead text-muted mb-4">
+            Track daily expenses in Indian Rupees (₹), set monthly category budgets, and understand where your money goes with visual analytics.
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg px-4 me-md-2">Get Started Free</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">Sign In</a>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow border-0 p-4 rounded-4 bg-white">
+            <h5 class="fw-bold mb-3 text-success"><i class="bi bi-shield-check me-2"></i>Core Highlights</h5>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill text-success fs-5 me-2"></i>
+                    <span><strong>Income & Expense Tracker:</strong> Track daily UPI, cash, & card spending.</span>
+                </li>
+                <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill text-success fs-5 me-2"></i>
+                    <span><strong>Monthly Budgets:</strong> Warning alerts before you overspend.</span>
+                </li>
+                <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill text-success fs-5 me-2"></i>
+                    <span><strong>Rupee (₹) Focused:</strong> Tailored for Indian personal finances.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

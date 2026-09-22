@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Transactions - FinanceFlow{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Transaction History</h2>
+        <p class="text-muted small mb-0">Search, filter, and manage all your entries.</p>
+    </div>
+</div>
+
+<!-- Search & Filters -->
+<div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+    <form method="GET" action="{{ url_for('transactions.list_transactions') }}" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="q" class="form-control" placeholder="Search by title or notes..." value="{{ search_query }}">
+        </div>
+        <div class="col-md-3">
+            <select name="type" class="form-select" onchange="this.form.submit()">
+                <option value="all" {% if current_type == 'all' %}selected{% endif %}>All Types</option>
+                <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>Expenses Only</option>
+                <option value="income" {% if current_type == 'income' %}selected{% endif %}>Income Only</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="all" {% if current_category == 'all' %}selected{% endif %}>All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-dark w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for tx in transactions %}
+                        <tr>
+                            <td class="text-muted small">{{ tx.date.strftime('%b %d, %Y') }}</td>
+                            <td class="fw-semibold">{{ tx.title }}</td>
+                            <td><span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2">{{ tx.category }}</span></td>
+                            <td>
+                                {% if tx.type == 'income' %}
+                                    <span class="badge bg-success-subtle text-success fw-semibold">Income</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger fw-semibold">Expense</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                {% if tx.type == 'income' %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(tx.amount) }}
+                            </td>
+                            <td class="text-center">
+                                <form action="{{ url_for('transactions.delete_transaction', id=tx.id) }}" method="POST" onsubmit="return confirm('Delete this transaction?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">No transactions found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

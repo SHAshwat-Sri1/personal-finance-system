@@ -13,7 +13,7 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     # If already logged in, no need to register again
     if current_user.is_authenticated:
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('main.dashboard'))  # Redirect to dashboard if already logged in
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -44,7 +44,7 @@ def register():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return f"<h1>Hello {current_user.username}! You are already logged in. <a href='/auth/logout'>Logout</a></h1>"
+        return redirect(url_for('main.dashboard'))  # Redirect to dashboard if already logged in
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -56,7 +56,7 @@ def login():
         if user and check_password_hash(user.password_hash, password):
             login_user(user)  # Creates the session cookie!
             flash(f'Welcome back, {user.username}!', 'success')
-            return f"<h1>Success! Welcome {user.username}! <a href='/auth/logout'>Click here to Logout</a></h1>"
+            return redirect(url_for('main.dashboard'))  # Redirect to dashboard after successful login
         else:
             flash('Invalid email or password. Please try again.', 'danger')
 

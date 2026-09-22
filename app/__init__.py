@@ -4,7 +4,7 @@ from flask_login import LoginManager
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'       # Redirect here if an unauthenticated user tries to visit a private page
+login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
 
 def create_app():
@@ -16,9 +16,16 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Register the auth blueprint (routes)
+    # Register Blueprints
+    from app.routes.main import main_bp
     from app.routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    from app.routes.transactions import transactions_bp
+    from app.routes.budgets import budgets_bp
+
+    app.register_blueprint(main_bp)                          # Mounts at /
+    app.register_blueprint(auth_bp, url_prefix='/auth')     # Mounts at /auth
+    app.register_blueprint(transactions_bp, url_prefix='/transactions')  # Mounts at /transactions
+    app.register_blueprint(budgets_bp, url_prefix='/budgets')  # Mounts at /budgets
 
     with app.app_context():
         from app import models

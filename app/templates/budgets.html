@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Monthly Budgets - FinanceFlow{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Monthly Budgets</h2>
+        <p class="text-muted small mb-0">Set category limits in <strong>Rupees (₹)</strong> to prevent overspending.</p>
+    </div>
+    <div>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#setBudgetModal">
+            <i class="bi bi-plus-circle me-1"></i> Set New Budget
+        </button>
+    </div>
+</div>
+
+<!-- Month Selector & Totals Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+            <label class="form-label fw-semibold small text-muted">SELECT MONTH</label>
+            <form method="GET" action="{{ url_for('budgets.list_budgets') }}">
+                <input type="month" name="month" class="form-control" value="{{ current_month }}" onchange="this.form.submit()">
+            </form>
+            <small class="text-muted mt-2 d-block">Viewing targets for <strong>{{ current_month }}</strong></small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+            <span class="text-muted small fw-bold text-uppercase">Total Budget Target</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0">₹{{ "{:,.2f}".format(total_budgeted) }}</h3>
+            <small class="text-muted">Combined limit across categories</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+            <span class="text-muted small fw-bold text-uppercase">Total Spent in Target Categories</span>
+            <h3 class="fw-bold text-danger mt-1 mb-0">₹{{ "{:,.2f}".format(total_spent) }}</h3>
+            <small class="text-muted">Actual expenses recorded</small>
+        </div>
+    </div>
+</div>
+
+<!-- Budgets List Cards -->
+<div class="row g-4">
+    {% if budgets %}
+        {% for b in budgets %}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ b.category }}</h5>
+                            <span class="text-muted small">Month: {{ current_month }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if b.pct >= 100 %}
+                                <span class="badge bg-danger-subtle text-danger fw-semibold px-2 py-1">
+                                    <i class="bi bi-exclamation-octagon-fill me-1"></i>Exceeded
+                                </span>
+                            {% elif b.pct >= 80 %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis fw-semibold px-2 py-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Near Limit
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success-subtle text-success fw-semibold px-2 py-1">
+                                    <i class="bi bi-check-circle-fill me-1"></i>On Track
+                                </span>
+                            {% endif %}
+
+                            <form action="{{ url_for('budgets.delete_budget', id=b.id) }}" method="POST" onsubmit="return confirm('Remove budget for {{ b.category }}?');">
+                                <button type="submit" class="btn btn-sm btn-link text-muted p-0 ms-1" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="my-3">
+                        <div class="d-flex justify-content-between small fw-semibold mb-1">
+                            <span>Spent: ₹{{ "{:,.2f}".format(b.spent) }}</span>
+                            <span>Limit: ₹{{ "{:,.2f}".format(b.monthly_limit) }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-{{ b.status }}" role="progressbar"
+                                 style="width: {{ [b.pct, 100]|min }}%;"
+                                 aria-valuenow="{{ b.pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <small class="text-muted">{{ b.pct }}% consumed</small>
+                        <span class="small fw-bold {% if b.remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                            {% if b.remaining < 0 %}
+                                Over by ₹{{ "{:,.2f}".format(-b.remaining) }}
+                            {% else %}
+                                ₹{{ "{:,.2f}".format(b.remaining) }} remaining
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+                <i class="bi bi-piggy-bank fs-1 text-secondary mb-2"></i>
+                <h5 class="fw-bold">No budgets set for {{ current_month }}</h5>
+                <p class="text-muted small mb-4">Set category limits so FinanceFlow can alert you before you overspend.</p>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#setBudgetModal">
+                        <i class="bi bi-plus-circle me-1"></i> Create Your First Budget
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal: Set Budget -->
+<div class="modal fade" id="setBudgetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Set Category Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('budgets.set_budget') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Category</label>
+                        <select name="category" class="form-select" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Monthly Limit (₹)</label>
+                        <input type="number" min="1" name="monthly_limit" class="form-control" placeholder="e.g. 5000" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Month</label>
+                        <input type="month" name="month_year" class="form-control" value="{{ current_month }}" required>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success fw-semibold py-2">Save Budget Target</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
